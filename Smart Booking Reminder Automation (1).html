@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart Booking Reminder – Travel bookings, automatically on your calendar</title>
+<meta name="description" content="Turns IRCTC and KSRTC booking emails into Google Calendar events with timely reminders. Serverless and free.">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FFFFFF;--alt:#F5F7FB;--ink:#0B1220;--mute:#556078;--line:#E3E8F2;--card:#fff;--acc:#2F4BFF;--acc2:#0E9F8E;--accsoft:#EAEEFF;--hero:linear-gradient(180deg,#EEF2FF 0%,#FFFFFF 100%);--sh:0 1px 2px #0b12200d,0 12px 32px #0b12200f;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0A0F1E;--alt:#0F1630;--ink:#EEF1FA;--mute:#9AA6C4;--line:#222C4D;--card:#121A38;--acc:#7C93FF;--acc2:#3FD0BE;--accsoft:#1B2550;--hero:linear-gradient(180deg,#121B42 0%,#0A0F1E 100%);--sh:0 12px 32px #0006}}
+:root[data-theme="dark"]{--bg:#0A0F1E;--alt:#0F1630;--ink:#EEF1FA;--mute:#9AA6C4;--line:#222C4D;--card:#121A38;--acc:#7C93FF;--acc2:#3FD0BE;--accsoft:#1B2550;--hero:linear-gradient(180deg,#121B42 0%,#0A0F1E 100%);--sh:0 12px 32px #0006}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:calc(72px + env(safe-area-inset-top,0px))}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16.5px/1.65 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:Manrope,Inter,sans-serif;margin:0;letter-spacing:-.02em}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+/* nav */
+nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font:800 18px Manrope,sans-serif;display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none}
+.logo i{width:28px;height:28px;border-radius:8px;background:var(--acc);display:grid;place-items:center}
+.links{display:flex;gap:28px;align-items:center}
+.links a{color:var(--mute);text-decoration:none;font-size:15px;font-weight:500}.links a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:10px;font:600 15px Inter,sans-serif;text-decoration:none;border:1px solid transparent;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px)}
+.pri{background:var(--acc);color:#fff;box-shadow:0 6px 18px color-mix(in srgb,var(--acc) 35%,transparent)}
+:root[data-theme="dark"] .pri{color:#0A0F1E}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pri{color:#0A0F1E}}
+.sec{background:var(--card);color:var(--ink);border-color:var(--line)}
+@media(max-width:760px){.links a{display:none}.links a.btn{display:inline-flex}}
+/* hero */
+.hero{background:var(--hero);overflow:hidden}
+.hero .wrap{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:center;min-height:620px;padding-top:40px;padding-bottom:40px}
+.tag{display:inline-flex;gap:8px;align-items:center;background:var(--accsoft);color:var(--acc);font-weight:600;font-size:13.5px;border-radius:999px;padding:6px 14px;margin-bottom:22px}
+h1{font-size:clamp(38px,5.6vw,64px);font-weight:800;line-height:1.05}
+h1 em{font-style:normal;color:var(--acc)}
+.hero p.sub{font-size:19px;color:var(--mute);max-width:50ch;margin:20px 0 30px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+#stage{position:relative;height:480px}#scene{position:absolute;inset:0;width:100%;height:100%}
+@media(max-width:860px){.hero .wrap{grid-template-columns:1fr;min-height:0}#stage{height:320px}}
+/* stats */
+.stats{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg)}
+.stats .wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;padding-top:28px;padding-bottom:28px}
+.stats b{display:block;font:800 30px Manrope,sans-serif}.stats span{color:var(--mute);font-size:14.5px}
+section{padding:88px 0}.alt{background:var(--alt)}
+.eyebrow{color:var(--acc);font-weight:600;font-size:14px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+h2{font-size:clamp(28px,4vw,40px);font-weight:800;max-width:20ch}
+.lead{color:var(--mute);max-width:60ch;margin:14px 0 44px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:28px;box-shadow:var(--sh)}
+.card h3{font-size:20px;margin:16px 0 8px}.card p{margin:0;color:var(--mute);font-size:15.5px}
+.n{width:40px;height:40px;border-radius:10px;background:var(--accsoft);color:var(--acc);display:grid;place-items:center;font:800 16px Manrope,sans-serif}
+/* demo */
+.demo{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);overflow:hidden}
+.demo>div{padding:26px}.demo>div+div{border-left:1px solid var(--line);background:var(--alt)}
+.lbl{font-weight:600;font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.pick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pick button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 13px;font:500 13.5px Inter,sans-serif;cursor:pointer}
+.pick button:hover,.pick button[aria-pressed=true]{border-color:var(--acc);color:var(--acc);background:var(--accsoft)}
+textarea{width:100%;min-height:270px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);padding:14px;font:500 13px/1.65 "IBM Plex Mono",monospace;resize:vertical}
+.tk{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.tk .top{padding:16px 18px;border-bottom:1px dashed var(--line)}.tk small{display:block;color:var(--mute);font-size:12px}
+.tk .rt{font:800 22px Manrope,sans-serif;margin-top:4px}.tk .fl{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:10px;padding:14px 18px;font-size:14px}
+.rem{list-style:none;margin:0 0 18px;padding:0}
+.rem li{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.rem li span{color:var(--mute)}
+.err{color:#D92D4A;font-weight:500}.path{display:inline-block;background:var(--accsoft);color:var(--acc);font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;margin-bottom:14px}
+@media(max-width:820px){.demo{grid-template-columns:1fr}.demo>div+div{border-left:0;border-top:1px solid var(--line)}}
+/* paths table + timeline */
+.tbl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--sh)}
+.scroll{overflow-x:auto}
+.tbl th,.tbl td{text-align:left;padding:16px 20px;border-bottom:1px solid var(--line);font-size:15px;vertical-align:top}
+.tbl th{background:var(--alt);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--mute)}
+.tbl tr:last-child td{border-bottom:0}.tbl td:first-child{font-weight:600}
+.tl{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.tl::before{content:"";position:absolute;left:12%;right:12%;top:27px;height:2px;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.tl div{text-align:center;position:relative;padding:0 8px}
+.tl b{width:54px;height:54px;border-radius:50%;background:var(--card);border:2px solid var(--acc);color:var(--acc);display:grid;place-items:center;margin:0 auto 14px;font:800 15px Manrope,sans-serif}
+.tl div:last-child b{background:var(--acc);color:var(--bg)}
+.tl span{display:block;font-weight:600}.tl small{color:var(--mute);font-size:14px}
+@media(max-width:700px){.tl{grid-template-columns:1fr 1fr;row-gap:28px}.tl::before{display:none}}
+.chips{display:flex;flex-wrap:wrap;gap:10px}.chips span{border:1px solid var(--line);background:var(--card);padding:9px 16px;border-radius:10px;font-weight:500;font-size:14.5px}
+footer{border-top:1px solid var(--line);padding:36px 0 48px;color:var(--mute);font-size:14.5px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+#bar{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2));z-index:20}
+.glow{position:absolute;inset:8% 6%;background:radial-gradient(closest-side,color-mix(in srgb,var(--acc) 38%,transparent),transparent 70%);filter:blur(30px);opacity:.7}
+#stage canvas{z-index:1}
+.tg{border:1px solid var(--line);background:var(--card);color:var(--ink);width:38px;height:38px;border-radius:10px;cursor:pointer;font-size:16px}
+.gh{display:inline-flex!important;align-items:center;gap:6px;border:1px solid var(--line);padding:8px 14px;border-radius:10px;color:var(--ink)!important}
+.card{transition:transform .25s,box-shadow .25s,border-color .25s}.card:hover{transform:translateY(-4px);border-color:var(--acc)}
+.js .rv{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}.js .rv.in{opacity:1;transform:none}
+/* flow */
+.flow{display:grid;grid-template-columns:1fr 90px 1fr;align-items:center;gap:8px;margin-bottom:44px}
+.em,.ev{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;box-shadow:var(--sh);font-size:14px}
+.em .h{font-weight:600;margin-bottom:10px;color:var(--mute);font-size:13px}
+.em span.k{display:inline-block;border-radius:6px;padding:1px 6px;background:var(--accsoft);color:var(--acc);font-family:"IBM Plex Mono",monospace;animation:hl 6s infinite}
+.em span.k:nth-of-type(2){animation-delay:.6s}.em span.k:nth-of-type(3){animation-delay:1.2s}
+@keyframes hl{0%,8%{background:var(--accsoft)}14%,40%{background:var(--acc);color:var(--bg)}60%,100%{background:var(--accsoft);color:var(--acc)}}
+.wire{height:2px;background:var(--line);position:relative}.wire::after{content:"";position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--acc2);animation:mv 6s infinite}
+@keyframes mv{0%,35%{left:0;opacity:0}40%{opacity:1}75%{left:calc(100% - 10px);opacity:1}85%,100%{left:calc(100% - 10px);opacity:0}}
+.ev{border-left:5px solid var(--acc);animation:pop 6s infinite}.ev b{font:800 18px Manrope,sans-serif;display:block}
+@keyframes pop{0%,70%{opacity:.35;transform:scale(.97)}80%,95%{opacity:1;transform:none}100%{opacity:.35;transform:scale(.97)}}
+.mocks{display:grid;grid-template-columns:1.5fr 1fr;gap:24px;align-items:start}
+.win{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--sh);overflow:hidden}
+.win .bar{display:flex;gap:6px;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--alt)}.win .bar i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:16px;font-size:13px;text-align:center}
+.cal div{padding:8px 0;border-radius:8px;color:var(--mute)}.cal .d{font-weight:600;color:var(--ink);font-size:12px}
+.cal .r{background:var(--accsoft);color:var(--acc);font-weight:600}.cal .j{background:var(--acc);color:var(--bg);font-weight:700}
+.phone{background:var(--ink);border-radius:34px;padding:12px;max-width:260px;margin:0 auto;box-shadow:var(--sh)}
+.phone .scr{background:var(--alt);border-radius:24px;padding:36px 14px 30px;min-height:290px}
+.note{background:var(--card);border-radius:14px;padding:12px 14px;font-size:13px;margin-bottom:10px;border:1px solid var(--line);color:var(--ink)}.note b{display:block;font-size:12px;color:var(--acc)}
+@media(max-width:820px){.flow{grid-template-columns:1fr}.wire{height:30px;width:2px;margin:0 auto}.mocks{grid-template-columns:1fr}}
+/* setup */
+.code{background:#0B1220;color:#E6EBFA;border-radius:12px;position:relative;margin-top:14px}
+.code pre{margin:0;padding:18px;overflow-x:auto;font:500 13px/1.7 "IBM Plex Mono",monospace}
+.cp{position:absolute;top:10px;right:10px;background:#ffffff1c;color:#fff;border:1px solid #ffffff33;border-radius:8px;padding:5px 12px;font:500 12.5px Inter,sans-serif;cursor:pointer}
+.sg{display:grid;gap:22px}.sg .card{display:grid;grid-template-columns:44px 1fr;gap:16px}.sg .card h3{margin:2px 0 6px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.faq details{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-bottom:12px}
+.faq summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between}.faq summary::after{content:"+";color:var(--acc);font-size:20px}
+.faq details[open] summary::after{content:"–"}.faq p{margin:12px 0 0;color:var(--mute)}
+.me{display:grid;grid-template-columns:96px 1fr;gap:26px;align-items:center}
+.av{width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;color:#fff;font:800 32px Manrope,sans-serif}
+.soon{border-style:dashed!important;color:var(--mute)}
+@media(max-width:600px){.me{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.em span.k,.wire::after,.ev{animation:none}.js .rv{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="bar"></div><nav><div class="wrap">
+<a class="logo" href="#top"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></i>Smart Booking Reminder</a>
+<div class="links"><a href="#how">How it works</a><a href="#demo">Live demo</a><a href="#sources">Email sources</a><a href="#reminders">Reminders</a><a href="#setup">Setup</a><a href="#faq">FAQ</a><button class="tg" id="tg" aria-label="Toggle light or dark theme">◐</button><a class="btn pri" href="#demo" style="padding:9px 18px">Try the demo</a></div>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+<div>
+<span class="tag">IRCTC &amp; KSRTC → Google Calendar</span>
+<h1>Your travel bookings, <em>on your calendar</em> before you think of it.</h1>
+<p class="sub">Smart Booking Reminder reads your ticket confirmation emails, creates a calendar event for each journey, and alerts you at the right moments. It runs by itself, on Google's infrastructure, at no cost.</p>
+<div class="cta"><a class="btn pri" href="#demo">Try the live demo</a><a class="btn sec" href="#how">See how it works</a></div>
+</div>
+<div id="stage"><div class="glow"></div><canvas id="scene" aria-label="3D illustration of a travel ticket" role="img"></canvas></div>
+</div></header>
+
+<div class="stats"><div class="wrap">
+<div><b>3</b><span>email delivery paths supported</span></div><div><b>4</b><span>reminders for every journey</span></div>
+<div><b>15 min</b><span>automatic check interval</span></div><div><b>$0</b><span>serverless, no hosting cost</span></div>
+</div></div>
+
+<section id="how"><div class="wrap">
+<div class="eyebrow">How it works</div><h2>From confirmation email to calendar event</h2>
+<p class="lead">Booking details are scattered across inboxes. The script gathers them into one place without any manual copying.</p>
+<div class="steps">
+<div class="card"><div class="n">1</div><h3>Detect</h3><p>A time-driven trigger scans Gmail every 15 minutes for new IRCTC and KSRTC confirmations.</p></div>
+<div class="card"><div class="n">2</div><h3>Extract</h3><p>Regex-based parsers read PNR, route, coach, seat and departure time from each email format.</p></div>
+<div class="card"><div class="n">3</div><h3>Schedule</h3><p>A Google Calendar event is created with a four-stage reminder pipeline, and the email is labelled to prevent duplicates.</p></div>
+</div></div></section>
+
+<section class="alt"><div class="wrap">
+<div class="eyebrow">See it happen</div><h2>An email becomes an event, then a reminder</h2>
+<p class="lead">The animation below shows what the script does for every confirmation. The calendar and phone previews are illustrations, not screenshots.</p>
+<div class="flow">
+<div class="em"><div class="h">Inbox · IRCTC Booking Confirmation</div>PNR <span class="k">2418503391</span><br>Route <span class="k">CHENNAI → HOSUR</span><br>Seat <span class="k">B2 / 34</span><br>Departs 15 Oct, 21:40</div>
+<div class="wire" aria-hidden="true"></div>
+<div class="ev"><b>Chennai → Hosur</b>15 Oct · 21:40<br>PNR 2418503391 · Coach B2 · Seat 34</div>
+</div>
+<div class="mocks">
+<div class="win"><div class="bar"><i></i><i></i><i></i></div><div style="padding:14px 16px 0;font:800 17px Manrope,sans-serif">October 2026</div><div class="cal" id="cal"></div></div>
+<div class="phone"><div class="scr"><div class="note"><b>Calendar · 1 hour to go</b>Leave now: Chennai → Hosur departs 21:40, Coach B2, Seat 34.</div><div class="note"><b>Calendar · tomorrow</b>Pack and prepare for your journey.</div></div></div>
+</div></div></section>
+<section id="demo"><div class="wrap">
+<div class="eyebrow">Live demo</div><h2>Try the parser</h2>
+<p class="lead">Paste a confirmation email or load a sample. Everything runs in your browser and nothing is uploaded.</p>
+<div class="demo">
+<div><div class="lbl">Email text</div>
+<div class="pick"><button data-s="0" aria-pressed="true">IRCTC (direct)</button><button data-s="1" aria-pressed="false">Cloudflare-forwarded</button><button data-s="2" aria-pressed="false">KSRTC (Gmail-forwarded)</button></div>
+<textarea id="inp" aria-label="Booking email text"></textarea>
+<div style="margin-top:14px"><button class="btn pri" id="go">Parse email</button></div></div>
+<div id="res" aria-live="polite"></div>
+</div></div></section>
+
+<section id="sources" class="alt"><div class="wrap">
+<div class="eyebrow">Email sources</div><h2>One result from every delivery path</h2>
+<p class="lead">The same booking can reach your inbox in different forms. Each is normalised before parsing.</p>
+<div class="scroll"><table class="tbl"><thead><tr><th>Path</th><th>What arrives</th><th>How it is handled</th></tr></thead><tbody>
+<tr><td>Direct</td><td>Original message from the booking service</td><td>Parsed as received</td></tr>
+<tr><td>Cloudflare-forwarded</td><td>Message routed through a custom domain, with extra headers</td><td>Routing headers stripped, original body parsed</td></tr>
+<tr><td>Gmail-forwarded</td><td>Forwarded copy with the original quoted inside</td><td>Quoted block located and parsed</td></tr>
+</tbody></table></div>
+<div class="chips" style="margin-top:24px"><span>IRCTC (rail)</span><span>KSRTC (bus)</span><span class="soon">More operators coming soon</span></div>
+</div></section>
+
+<section id="reminders"><div class="wrap">
+<div class="eyebrow">Reminders</div><h2>Four alerts, from planning to departure</h2>
+<p class="lead">Each journey is followed by a staged pipeline so you have time to prepare and no reason to rush.</p>
+<div class="tl">
+<div><b>5d</b><span>5 days before</span><small>Plan leave and transport</small></div>
+<div><b>3d</b><span>3 days before</span><small>Confirm your booking</small></div>
+<div><b>1d</b><span>1 day before</span><small>Pack and prepare</small></div>
+<div><b>1h</b><span>1 hour before</span><small>Time to leave</small></div>
+</div></div></section>
+
+<section class="alt"><div class="wrap">
+<div class="eyebrow">Built with</div><h2>Simple, serverless stack</h2>
+<p class="lead" style="margin-bottom:28px">No servers to run and nothing to maintain.</p>
+<div class="chips"><span>Google Apps Script</span><span>Gmail API</span><span>Google Calendar API</span><span>Regex parsing</span><span>Time-driven triggers</span><span>GitHub</span></div>
+</div></section>
+
+<section id="setup"><div class="wrap">
+<div class="eyebrow">Setup guide</div><h2>Install it in about five minutes</h2>
+<p class="lead">It runs inside your own Google account. The snippets below are examples of the key parts; the complete script is in the GitHub repository.</p>
+<div class="sg">
+<div class="card"><div class="n">1</div><div><h3>Create the project</h3><p>Open script.google.com, create a new project and paste in the script from the repository.</p></div></div>
+<div class="card"><div class="n">2</div><div><h3>Find booking emails</h3><p>Search only for confirmations that have not been processed yet.</p>
+<div class="code"><button class="cp" data-t="c1">Copy</button><pre id="c1">from:(ticketadmin@irctc.co.in OR etickets@ksrtc.in) -label:processed</pre></div></div></div>
+<div class="card"><div class="n">3</div><div><h3>Add the four reminders</h3><p>Reminder offsets are in minutes before departure.</p>
+<div class="code"><button class="cp" data-t="c2">Copy</button><pre id="c2">[7200, 4320, 1440, 60].forEach(function (m) {
+  event.addPopupReminder(m);
+});</pre></div></div></div>
+<div class="card"><div class="n">4</div><div><h3>Start the 15-minute trigger</h3><p>Run this once and approve the Gmail and Calendar permissions.</p>
+<div class="code"><button class="cp" data-t="c3">Copy</button><pre id="c3">function setup() {
+  ScriptApp.newTrigger('processBookings')
+    .timeBased().everyMinutes(15).create();
+}</pre></div></div></div>
+</div></div></section>
+
+<section class="alt"><div class="wrap">
+<div class="eyebrow">Privacy</div><h2>Your data stays in your account</h2>
+<p class="lead" style="margin-bottom:28px">The script runs under your own Google account. It reads only booking emails and writes only to your calendar.</p>
+<div class="two">
+<div class="card"><h3>No external server</h3><p>There is no backend of ours. Nothing is sent anywhere except Google's own Gmail and Calendar services.</p></div>
+<div class="card"><h3>Narrow access</h3><p>It looks only for IRCTC and KSRTC confirmations and marks them with a label so they are not read again.</p></div>
+<div class="card"><h3>Open source</h3><p>The code is public on GitHub, so anyone can read exactly what it does before running it.</p></div>
+</div></div></section>
+
+<section id="faq"><div class="wrap">
+<div class="eyebrow">FAQ</div><h2>Common questions</h2><div style="height:28px"></div>
+<div class="faq">
+<details><summary>Does it cost anything?</summary><p>No. It runs on Google Apps Script, which is free for personal use within Google's standard quotas.</p></details>
+<details><summary>Which tickets are supported?</summary><p>IRCTC rail and KSRTC bus confirmations, whether they arrive directly, via Cloudflare email routing, or forwarded from Gmail.</p></details>
+<details><summary>How fast does an event appear?</summary><p>The script checks every 15 minutes, so a new confirmation is usually on your calendar within that time.</p></details>
+<details><summary>Will it create duplicates?</summary><p>No. Each processed email gets a Gmail label, and labelled emails are skipped on later runs.</p></details>
+<details><summary>What if an email format changes?</summary><p>A parser may need a small update. Opening an issue on GitHub is the best way to report it.</p></details>
+</div></div></section>
+
+<section class="alt"><div class="wrap"><div class="me">
+<div class="av" aria-hidden="true">MP</div>
+<div><div class="eyebrow">Built by</div><h2 style="max-width:none;font-size:30px">S.S. Manikanda Prabu</h2>
+<p style="color:var(--mute);margin:10px 0 18px;max-width:60ch">B.Tech Computer Science student at SRM Institute of Science and Technology, Chennai. I build practical automation tools that remove repetitive work.</p>
+<a class="btn pri" href="https://github.com/" target="_blank" rel="noopener">View on GitHub</a> <a class="btn sec" href="https://www.linkedin.com/" target="_blank" rel="noopener">LinkedIn</a></div>
+</div></div></section>
+<footer><div class="wrap"><span>© 2026 Smart Booking Reminder Automation · Built by Manikanda Prabu</span><span><a href="https://github.com/" target="_blank" rel="noopener" style="color:inherit">GitHub</a> · <a href="https://www.linkedin.com/" target="_blank" rel="noopener" style="color:inherit">LinkedIn</a></span></div></footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ---- 3D: single refined ticket with soft orbit rings ---- */
+(function(){
+if(!window.THREE)return;var c=document.getElementById('scene'),dark=matchMedia('(prefers-color-scheme:dark)').matches;
+var R=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));
+var S=new THREE.Scene(),C=new THREE.PerspectiveCamera(35,1,.1,100);C.position.set(0,0,11);
+S.add(new THREE.HemisphereLight(0xffffff,0x8899ff,.9));var L=new THREE.DirectionalLight(0xffffff,.8);L.position.set(3,5,7);S.add(L);
+var t=document.createElement('canvas');t.width=1200;t.height=560;var x=t.getContext('2d');
+x.fillStyle='#fff';x.fillRect(0,0,1200,560);x.fillStyle='#2F4BFF';x.fillRect(0,0,1200,120);
+x.fillStyle='#fff';x.font='700 44px Arial';x.fillText('TRAVEL CONFIRMATION',48,76);x.font='500 30px Arial';x.fillText('SBR',1060,76);
+x.fillStyle='#0B1220';x.font='800 82px Arial';x.fillText('CHENNAI',48,240);x.fillStyle='#2F4BFF';x.fillText('→',500,240);x.fillStyle='#0B1220';x.fillText('HOSUR',590,240);
+x.fillStyle='#667089';x.font='500 28px Arial';['PNR','COACH','SEAT','DEPARTS'].forEach(function(l,i){x.fillText(l,48+i*270,330)});
+x.fillStyle='#0B1220';x.font='600 40px monospace';['2418xxxx03','B2','34','21:40'].forEach(function(v,i){x.fillText(v,48+i*270,380)});
+x.strokeStyle='#CBD3E6';x.setLineDash([12,10]);x.lineWidth=3;x.beginPath();x.moveTo(48,440);x.lineTo(1152,440);x.stroke();
+x.setLineDash([]);x.fillStyle='#0E9F8E';x.beginPath();x.arc(70,500,16,0,7);x.fill();x.fillStyle='#0B1220';x.font='500 30px Arial';x.fillText('4 reminders scheduled',104,510);
+for(var i=0;i<34;i++){x.fillStyle='#0B1220';x.fillRect(880+i*8,470,i%3?3:5,60)}
+var tex=new THREE.CanvasTexture(t);tex.anisotropy=8;
+var edge=new THREE.MeshStandardMaterial({color:0xdfe5f7,roughness:.5}),
+ tk=new THREE.Mesh(new THREE.BoxGeometry(6,2.8,.14),[edge,edge,edge,edge,new THREE.MeshStandardMaterial({map:tex,roughness:.45}),new THREE.MeshStandardMaterial({color:0xeef1fb})]);
+var grp=new THREE.Group();grp.add(tk);S.add(grp);
+function ring(r,col,op){var m=new THREE.Mesh(new THREE.TorusGeometry(r,.012,8,160),new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op}));m.rotation.x=1.2;grp.add(m);return m}
+var r1=ring(4.4,0x2F4BFF,.45),r2=ring(5.2,0x0E9F8E,.35);r2.rotation.y=.5;
+var dots=[0x2F4BFF,0x0E9F8E,0x2F4BFF,0x0E9F8E].map(function(col,i){var m=new THREE.Mesh(new THREE.SphereGeometry(.13,20,20),new THREE.MeshStandardMaterial({color:col}));grp.add(m);return m});
+var mx=0,my=0;addEventListener('pointermove',function(e){mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+function size(){var w=c.clientWidth,h=c.clientHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix();grp.scale.setScalar(w<520?.55:w<860?.8:.95)}
+addEventListener('resize',size);size();
+var still=matchMedia('(prefers-reduced-motion:reduce)').matches,T=0;
+function frame(){grp.rotation.y+=((-.4+mx*.7)-grp.rotation.y)*.06;grp.rotation.x+=((.12+my*.35)-grp.rotation.x)*.06;R.render(S,C)}
+function loop(){T+=.012;grp.position.y=Math.sin(T)*.12;
+ r1.rotation.z=T*.4;r2.rotation.z=-T*.3;
+ dots.forEach(function(d,i){var a=T*(i%2?-.5:.5)+i*1.6,r=i%2?5.2:4.4;d.position.set(Math.cos(a)*r,Math.sin(a)*r*Math.cos(1.2),Math.sin(a)*r*Math.sin(1.2))});
+ frame();if(!still)requestAnimationFrame(loop)}
+loop();if(still)addEventListener('pointermove',frame);
+})();
+
+/* ---- Parser ---- */
+var SAMPLES=[
+"From: IRCTC <ticketadmin@irctc.co.in>\nSubject: Booking Confirmation\n\nPNR No: 2418503391\nFrom: CHENNAI CENTRAL\nTo: HOSUR\nDate of Journey: 15-Oct-2026\nDeparture: 21:40\nCoach: B2\nSeat No: 34",
+"Received: by mail.cloudflare.net\nX-Forwarded-For: ticketadmin@irctc.co.in\nX-Original-To: me@mydomain.com\n\nPNR No: 2418503391\nFrom: BENGALURU\nTo: HOSUR\nDate of Journey: 20-Oct-2026\nDeparture: 06:15\nCoach: S4\nSeat No: 58",
+"---------- Forwarded message ---------\nFrom: KSRTC <etickets@ksrtc.in>\n\n> Ticket No: K7X92B41\n> From: HOSUR\n> To: MYSURU\n> Date of Journey: 02/11/2026\n> Departure: 22:30\n> Seat No: 12"];
+var inp=document.getElementById('inp'),res=document.getElementById('res'),btns=document.querySelectorAll('.pick button');
+function esc(v){return String(v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function g(re,s){var m=s.match(re);return m?m[1].trim():''}
+btns.forEach(function(b){b.onclick=function(){btns.forEach(function(o){o.setAttribute('aria-pressed',o===b)});inp.value=SAMPLES[+b.dataset.s];parse()}});
+document.getElementById('go').onclick=parse;inp.value=SAMPLES[0];
+var MON='jan feb mar apr may jun jul aug sep oct nov dec'.split(' ');
+function parse(){
+ var raw=inp.value,path='Direct';
+ if(/Forwarded message/i.test(raw))path='Gmail-forwarded';else if(/cloudflare|X-Forwarded-For/i.test(raw))path='Cloudflare-forwarded';
+ var s=raw.replace(/^\s*>+\s?/gm,'').replace(/^(Received|X-[\w-]+|Return-Path):.*$/gmi,'').replace(/^From:.*(irctc|ksrtc)[^\n]*\n/gmi,'');
+ var pnr=g(/(?:PNR(?:\s*No\.?)?|Ticket\s*No\.?)\s*[:\-]\s*([A-Z0-9]{6,12})/i,s),from=g(/^\s*From\s*:\s*(.+)$/mi,s),to=g(/^\s*To\s*:\s*(.+)$/mi,s),
+  coach=g(/Coach\s*[:\-]\s*(\w+)/i,s),seat=g(/Seat(?:\s*No\.?)?\s*[:\-]\s*(\w+)/i,s),
+  dt=s.match(/(\d{1,2})[-\/ ]([A-Za-z]{3}|\d{1,2})[-\/ ](\d{4})/),tm=s.match(/(?:Departure|Time|Dep)\s*[:\-]\s*(\d{1,2}):(\d{2})/i);
+ if(!pnr||!dt||!tm){res.innerHTML='<div class="lbl">Result</div><p class="err">Could not find a booking number, date and departure time. Check the pasted text.</p>';return}
+ var mo=isNaN(dt[2])?MON.indexOf(dt[2].toLowerCase()):+dt[2]-1,d=new Date(+dt[3],mo,+dt[1],+tm[1],+tm[2]);
+ var R=[['5 days before',5*864e5],['3 days before',3*864e5],['1 day before',864e5],['1 hour before',36e5]];
+ var fmt=function(x){return x.toLocaleString([],{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})},
+  z=function(x){return x.toISOString().replace(/[-:]|\.\d{3}/g,'')},
+  url='https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent((from||'Journey')+' → '+(to||'?')+' ('+pnr+')')+'&dates='+z(d)+'/'+z(new Date(d.getTime()+36e5))+'&details='+encodeURIComponent('PNR '+pnr+(coach?' | Coach '+coach:'')+(seat?' | Seat '+seat:''));
+ res.innerHTML='<div class="lbl">Parsed journey</div><span class="path">Detected: '+path+'</span>'+
+ '<div class="tk"><div class="top"><small>Route</small><div class="rt">'+esc(from||'—')+' → '+esc(to||'—')+'</div></div><div class="fl mono"><div><small>PNR</small>'+esc(pnr)+'</div><div><small>Coach</small>'+esc(coach||'—')+'</div><div><small>Seat</small>'+esc(seat||'—')+'</div><div><small>Departs</small>'+fmt(d)+'</div></div></div>'+
+ '<div class="lbl">Reminders</div><ul class="rem">'+R.map(function(r){return '<li>'+r[0]+'<span class="mono">'+fmt(new Date(d-r[1]))+'</span></li>'}).join('')+'</ul>'+
+ '<a class="btn pri" target="_blank" rel="noopener" href="'+url+'">Add to Google Calendar</a>';
+}
+parse();
+document.documentElement.classList.add('js');
+/* calendar preview: Oct 2026 starts on Thursday */
+(function(){var h='';'SMTWTFS'.split('').forEach(function(d){h+='<div class="d">'+d+'</div>'});
+for(var i=0;i<4;i++)h+='<div></div>';
+for(var d=1;d<=31;d++)h+='<div class="'+(d==15?'j':(d==10||d==12||d==14)?'r':'')+'">'+d+'</div>';
+document.getElementById('cal').innerHTML=h})();
+/* theme toggle */
+var tg=document.getElementById('tg'),root=document.documentElement,dk=matchMedia('(prefers-color-scheme:dark)').matches;
+tg.onclick=function(){dk=!dk;root.setAttribute('data-theme',dk?'dark':'light')};
+/* copy buttons */
+document.querySelectorAll('.cp').forEach(function(b){b.onclick=function(){var t=document.getElementById(b.dataset.t).textContent;
+function ok(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1600)}
+try{navigator.clipboard.writeText(t).then(ok,fb)}catch(e){fb()}
+function fb(){var a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){}a.remove()}}});
+/* scroll progress + reveal */
+var bar=document.getElementById('bar');
+addEventListener('scroll',function(){var h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'},{passive:true});
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+document.querySelectorAll('.eyebrow,section h2,.card,.tbl,.demo,.tl>div,.faq details,.win,.phone,.flow,.me,.chips').forEach(function(el){el.classList.add('rv');io.observe(el)});
+</script>
+</body>
+</html>
